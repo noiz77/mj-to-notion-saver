@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "MJ to Notion Saver",
+  "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "host_permissions": [
+    "https://www.midjourney.com/*",
+    "https://api.notion.com/*"
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.midjourney.com/*"
+      ],
+      "js": [
+        "src/content.js"
+      ]
+    }
+  ]
+}

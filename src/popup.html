@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 320px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f7f7f7;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .icon-btn {
+      width: auto;
+      padding: 6px 10px;
+      background-color: transparent;
+      color: #666;
+      border: 1px solid #e0e0e0;
+      font-size: 12px;
+      font-weight: normal;
+    }
+
+    .icon-btn:hover {
+      background-color: #eaeaea;
+      border-color: #ccc;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      margin-bottom: 5px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 13px;
+    }
+
+    input:focus {
+      border-color: #000;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #333;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+      margin-top: 15px;
+      color: #444;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .help-text {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 11px;
+      color: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h3>Notion 配置</h3>
+    <button id="templateBtn" class="icon-btn" title="获取 Notion 模板">📋 模板</button>
+  </div>
+
+  <label for="token">Integration Token</label>
+  <div class="help-text">在 notion.so/my-integrations 创建，以 secret_ 开头</div>
+  <input type="password" id="token" placeholder="secret_...">
+
+  <label for="dbId">Database ID</label>
+  <div class="help-text">打开数据库页面，URL 中 notion.so/ 后面的 32 位字符</div>
+  <input type="text" id="dbId" placeholder="例如: 8d844229...">
+
+  <button id="saveBtn">保存配置</button>
+  <div id="status" class="status"></div>
+
+  <div class="footer">MJ to Notion Saver</div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
