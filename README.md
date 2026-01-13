@@ -8,7 +8,7 @@
 - **智能解析**：自动分离 Prompt 与 Parameters，保持数据结构化。
 - **完整溯源**：同时保存高清原图直链与生成时间。
 
-![使用示例](screenshots/readme_demo.png)
+<img src="screenshots/readme_demo.png" alt="使用示例" width="100%">
 
 ## 📥 如何安装
 
