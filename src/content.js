@@ -45,12 +45,23 @@ function createButton() {
     document.body.appendChild(btn);
 }
 
+const IMAGE_SOURCE_HOSTS = [
+    'cdn.midjourney.com',
+    'cdn.nijijourney.com'
+];
+
+function isSupportedImageUrl(url) {
+    if (!url) return false;
+
+    const decodedUrl = safeDecodeUrl(url);
+    return IMAGE_SOURCE_HOSTS.some(host => decodedUrl.includes(host));
+}
+
 function getBestImage() {
     const images = Array.from(document.querySelectorAll('img'));
 
     const candidates = images.filter(img => {
-        return (img.src && img.src.includes('cdn.midjourney.com')) ||
-            (img.currentSrc && img.currentSrc.includes('cdn.midjourney.com'));
+        return isSupportedImageUrl(img.src) || isSupportedImageUrl(img.currentSrc);
     });
 
     if (candidates.length === 0) return null;
@@ -131,7 +142,28 @@ function getBestPrompt(rootElement = document.body) {
     return finalStr;
 }
 
+function safeDecodeUrl(url) {
+    try {
+        return decodeURIComponent(url);
+    } catch (e) {
+        return url;
+    }
+}
+
 function cleanImageUrl(url) {
+    if (!url) return url;
+
+    try {
+        const parsedUrl = new URL(url);
+        const proxiedUrl = parsedUrl.searchParams.get('url');
+
+        if (proxiedUrl && isSupportedImageUrl(proxiedUrl)) {
+            return proxiedUrl;
+        }
+    } catch (e) {
+        return url;
+    }
+
     return url;
 }
 

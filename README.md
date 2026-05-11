@@ -1,12 +1,13 @@
 # MJ to Notion Saver
 
-一键将 Midjourney 的图片及其提示词（Prompt）保存到 Notion 数据库。
+一键将 Midjourney / Nijijourney 的图片及其提示词（Prompt）保存到 Notion 数据库。
 
 ## ✨ 特点介绍
 
 - **极速保存**：点击 "Save to Notion" 按钮，瞬间归档。
 - **智能解析**：自动分离 Prompt 与 Parameters，保持数据结构化。
 - **完整溯源**：同时保存高清原图直链与生成时间。
+- **站点支持**：支持 `https://www.midjourney.com/` 与 `https://nijijourney.com/`。
 
 <img src="screenshots/readme_demo.png" alt="使用示例" width="100%">
 
