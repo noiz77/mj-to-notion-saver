@@ -94,6 +94,11 @@
       line-height: 1.4;
     }
 
+    .help-text a {
+      color: #333;
+      text-decoration: underline;
+    }
+
     .footer {
       margin-top: 20px;
       text-align: center;
@@ -110,12 +115,13 @@
   </div>
 
   <label for="token">Integration Token</label>
-  <div class="help-text">在 notion.so/my-integrations 创建，以 secret_ 开头</div>
+  <div class="help-text">在 <a href="https://www.notion.so/my-integrations" id="integrationsLink">my integrations</a> 创建，以 secret_ 开头</div>
   <input type="password" id="token" placeholder="secret_...">
 
-  <label for="dbId">Database ID</label>
-  <div class="help-text">打开数据库页面，URL 中 notion.so/ 后面的 32 位字符</div>
-  <input type="text" id="dbId" placeholder="例如: 8d844229...">
+  <label for="dbUrl">Notion 页面（Database）</label>
+  <div class="help-text">粘贴 Notion 数据库链接，插件会自动提取 Database ID</div>
+  <input type="text" id="dbUrl" placeholder="https://www.notion.so/...">
+  <div id="dbStatus" class="help-text"></div>
 
   <button id="saveBtn">保存配置</button>
   <div id="status" class="status"></div>

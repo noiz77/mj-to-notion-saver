@@ -20,7 +20,7 @@
 
 2. **配置插件**：
    - 点击浏览器工具栏的插件图标。
-   - 填入你的 Notion `Integration Token` 和 `Database ID`。
+   - 填入你的 Notion `Integration Token`，并粘贴 Notion 数据库链接。
 
 ## 🛠️ Notion 准备
 
@@ -39,7 +39,7 @@
 
 3. **连接集成**：
    - 在数据库页面点击右上角 `...` -> `Connect to` (或 `Connections`) -> 添加第一步创建的 Integration。
-   - 复制数据库 URL 中 `notion.so/` 后的 32 位字符作为 `Database ID`。
+   - 复制数据库页面的完整链接，粘贴到插件的 `Notion 页面（Database）` 输入框，插件会自动提取 `Database ID`。
 
 ## ❓ 常见问题
 
