@@ -2,9 +2,12 @@
 
 一键将 Midjourney / Nijijourney 的图片及其提示词（Prompt）保存到 Notion 数据库。
 
+当前版本：`v1.1.1`
+
 ## ✨ 特点介绍
 
 - **极速保存**：点击 "Save to Notion" 按钮，瞬间归档。
+- **保存后直达**：保存成功后可直接打开新建的 Notion 页面。
 - **智能解析**：自动分离 Prompt 与 Parameters，保持数据结构化。
 - **完整溯源**：同时保存高清原图直链与生成时间。
 - **站点支持**：支持 `https://www.midjourney.com/` 与 `https://nijijourney.com/`。
@@ -20,7 +23,11 @@
 
 2. **配置插件**：
    - 点击浏览器工具栏的插件图标。
-   - 填入你的 Notion `Integration Token`，并粘贴 Notion 数据库链接。
+   - 填入你的 Notion `Integration Token`（支持 `secret_` 和 `ntn_` 开头的 Token），并粘贴 Notion 数据库链接。
+
+3. **保存并打开页面**：
+   - 在 Midjourney 或 Nijijourney 中打开图片大图，点击 `Save to Notion`。
+   - 保存成功后，点击绿色的 `已保存，打开页面 ↗` 按钮即可跳转到新建的 Notion 页面。
 
 ## 🛠️ Notion 准备
 
@@ -48,6 +55,10 @@
 
 - **Q: 提示 "Notion API Error"？**
   - A: 最常见原因是**未在数据库页面连接 Integration**。其次请检查 Token 是否正确，以及数据库的列名是否完全匹配。
+
+## 📌 版本记录
+
+完整更新内容见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 🔒 隐私声明
 
