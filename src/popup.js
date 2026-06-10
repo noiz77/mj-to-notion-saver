@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const tokenInput = document.getElementById('token');
   const dbUrlInput = document.getElementById('dbUrl');
   const dbStatus = document.getElementById('dbStatus');
+  const version = chrome.runtime.getManifest().version_name || chrome.runtime.getManifest().version;
+
+  document.getElementById('version').textContent = `v${version}`;
 
   function extractNotionDatabaseId(value) {
     const input = value.trim();

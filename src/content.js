@@ -15,7 +15,8 @@ function createButton() {
 
     const btn = document.createElement('button');
     btn.id = 'mj-notion-save-btn';
-    btn.innerText = 'Save to Notion';
+    btn.textContent = 'Save to Notion';
+    btn.dataset.state = 'idle';
     btn.style.position = 'fixed';
     btn.style.bottom = '30px';
     btn.style.right = '30px';
@@ -33,16 +34,34 @@ function createButton() {
 
     btn.onmouseover = () => {
         btn.style.transform = 'translateY(-2px)';
-        btn.style.backgroundColor = '#333';
+        btn.style.backgroundColor = getButtonBackground(btn.dataset.state, true);
     };
     btn.onmouseout = () => {
         btn.style.transform = 'translateY(0)';
-        btn.style.backgroundColor = '#1a1a1a';
+        btn.style.backgroundColor = getButtonBackground(btn.dataset.state);
     };
 
     btn.onclick = handleSave;
 
     document.body.appendChild(btn);
+}
+
+function getButtonBackground(state, hovered = false) {
+    const colors = {
+        idle: hovered ? '#333333' : '#1a1a1a',
+        loading: hovered ? '#333333' : '#1a1a1a',
+        success: hovered ? '#236b23' : '#2d862d',
+        error: hovered ? '#a30000' : '#cc0000'
+    };
+
+    return colors[state] || colors.idle;
+}
+
+function setButtonState(btn, text, state, disabled) {
+    btn.textContent = text;
+    btn.dataset.state = state;
+    btn.disabled = disabled;
+    btn.style.backgroundColor = getButtonBackground(state);
 }
 
 const IMAGE_SOURCE_HOSTS = [
@@ -182,19 +201,45 @@ function splitPromptAndParams(fullString) {
     };
 }
 
+function getNotionPageUrl(response) {
+    const page = response && response.data;
+    if (!page) return null;
+
+    const pageUrl = page.pageUrl
+        || page.url
+        || page.public_url
+        || (page.id ? `https://www.notion.so/${page.id.replace(/-/g, '')}` : null);
+
+    if (!pageUrl) return null;
+
+    try {
+        const parsedUrl = new URL(pageUrl);
+        const isNotionHost = /(^|\.)notion\.(so|site|com)$/i.test(parsedUrl.hostname);
+        return parsedUrl.protocol === 'https:' && isNotionHost ? parsedUrl.href : null;
+    } catch (e) {
+        return null;
+    }
+}
+
 function handleSave() {
     const btn = document.getElementById('mj-notion-save-btn');
     const originalText = 'Save to Notion';
+    const savedPageUrl = btn.dataset.notionPageUrl;
+
+    if (savedPageUrl) {
+        window.open(savedPageUrl, '_blank', 'noopener,noreferrer');
+        resetBtn(btn, originalText);
+        return;
+    }
 
     if (btn.disabled) return;
 
-    btn.innerText = '提取中...';
-    btn.disabled = true;
+    setButtonState(btn, '提取中...', 'loading', true);
 
     const bestImg = getBestImage();
     if (!bestImg) {
         alert('未找到有效图片 (No Image Found)。请先点击图片进入大图/灯箱模式。');
-        btn.innerText = '无图片';
+        setButtonState(btn, '无图片', 'error', true);
         setTimeout(() => resetBtn(btn, originalText), 2000);
         return;
     }
@@ -222,8 +267,7 @@ function handleSave() {
 
     if (!chrome.runtime || !chrome.runtime.sendMessage) {
         alert('插件连接已断开（可能是刚刚更新了插件）。\n请刷新当前页面即可恢复！');
-        btn.innerText = '请刷页面';
-        btn.style.backgroundColor = '#cc0000';
+        setButtonState(btn, '请刷页面', 'error', true);
         return;
     }
 
@@ -241,35 +285,44 @@ function handleSave() {
                 const msg = chrome.runtime.lastError.message;
                 if (msg.includes("Extension context invalidated")) {
                     alert('插件已更新，请刷新当前页面后重试。');
-                    btn.innerText = '请刷新';
+                    setButtonState(btn, '请刷新', 'error', true);
                 } else {
                     alert('插件错误: ' + msg);
-                    btn.innerText = '错误';
+                    setButtonState(btn, '错误', 'error', true);
                 }
-                btn.style.backgroundColor = '#cc0000';
+                setTimeout(() => resetBtn(btn, originalText), 2000);
             } else if (response && response.success) {
-                btn.innerText = '已保存!';
-                btn.style.backgroundColor = '#2d862d';
+                const notionPageUrl = getNotionPageUrl(response);
+
+                if (notionPageUrl) {
+                    btn.dataset.notionPageUrl = notionPageUrl;
+                    setButtonState(btn, '已保存，打开页面 ↗', 'success', false);
+                    setTimeout(() => {
+                        if (btn.dataset.notionPageUrl === notionPageUrl) {
+                            resetBtn(btn, originalText);
+                        }
+                    }, 8000);
+                } else {
+                    setButtonState(btn, '已保存!', 'success', true);
+                    setTimeout(() => resetBtn(btn, originalText), 2000);
+                }
             } else {
-                btn.innerText = '失败';
-                btn.style.backgroundColor = '#cc0000';
+                setButtonState(btn, '失败', 'error', true);
                 console.error("Save failed:", response ? response.error : 'Unknown');
+                setTimeout(() => resetBtn(btn, originalText), 2000);
             }
-            setTimeout(() => resetBtn(btn, originalText), 2000);
         });
     } catch (e) {
         console.error("Runtime error:", e);
         alert('运行时错误: ' + e.message + '\n请刷新网页重试。');
-        btn.innerText = '错误';
-        btn.style.backgroundColor = '#cc0000';
+        setButtonState(btn, '错误', 'error', true);
         setTimeout(() => resetBtn(btn, originalText), 2000);
     }
 }
 
 function resetBtn(btn, text = 'Save to Notion') {
-    btn.innerText = text;
-    btn.disabled = false;
-    btn.style.backgroundColor = '#1a1a1a';
+    delete btn.dataset.notionPageUrl;
+    setButtonState(btn, text, 'idle', false);
 }
 
 const observer = new MutationObserver(debounce(() => {

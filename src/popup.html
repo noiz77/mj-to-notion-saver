@@ -115,7 +115,7 @@
   </div>
 
   <label for="token">Integration Token</label>
-  <div class="help-text">在 <a href="https://www.notion.so/my-integrations" id="integrationsLink">my integrations</a> 创建，以 secret_ 开头</div>
+  <div class="help-text">在 <a href="https://www.notion.so/my-integrations" id="integrationsLink">my integrations</a> 创建，以 secret_ 或 ntn_ 开头</div>
   <input type="password" id="token" placeholder="secret_...">
 
   <label for="dbUrl">Notion 页面（Database）</label>
@@ -126,7 +126,7 @@
   <button id="saveBtn">保存配置</button>
   <div id="status" class="status"></div>
 
-  <div class="footer">MJ to Notion Saver</div>
+  <div class="footer">MJ to Notion Saver <span id="version"></span></div>
 
   <script src="popup.js"></script>
 </body>

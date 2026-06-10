@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
 
       savePageToNotion(request.data, config.notionToken, config.notionDbId)
-        .then(res => sendResponse({ success: true, data: res }))
+        .then(page => sendResponse({ success: true, data: page }))
         .catch(err => sendResponse({ success: false, error: err.message }));
     });
     return true;
@@ -112,5 +112,25 @@ async function savePageToNotion(data, token, dbId) {
     throw new Error(msg);
   }
 
-  return resJson;
+  return {
+    id: resJson.id,
+    pageUrl: getNotionPageUrl(resJson),
+    url: resJson.url
+  };
+}
+
+function getNotionPageUrl(page) {
+  if (page.url) {
+    return page.url;
+  }
+
+  if (page.public_url) {
+    return page.public_url;
+  }
+
+  if (page.id) {
+    return `https://www.notion.so/${page.id.replace(/-/g, '')}`;
+  }
+
+  return null;
 }
