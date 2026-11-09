@@ -95,70 +95,90 @@ function getBestImage() {
 }
 
 function getBestPrompt(rootElement = document.body) {
+    const lightbox = document.getElementById('lightboxPrompt');
+    if (lightbox) {
+        const text = lightbox.querySelector('.notranslate');
+        if (!text) return null;
+        const prompt = text.innerText.trim();
+        const parameters = Array.from(lightbox.querySelectorAll('button span'))
+            .map(span => span.textContent.trim())
+            .filter(value => /^--[a-z][a-z0-9-]*(?:\s|$)/i.test(value));
+        return [prompt, ...new Set(parameters)].filter(Boolean).join(' ');
+    }
     const fullText = rootElement.innerText || "";
     const lines = fullText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
     let mainPrompt = "";
     let capturedParams = [];
 
-    const validParams = [
-        "ar", "aspect", "v", "version", "niji",
-        "c", "chaos", "s", "stylize", "w", "weird",
-        "q", "quality", "r", "repeat", "stop", "seed",
-        "iw", "no", "tile", "video", "relax", "fast", "turbo",
-        "style", "cref", "cw", "sref", "sw", "p", "personalize",
-        "oref", "profile", "editor", "edit"
-    ];
+    // Explicit parameters retain unknown future keys; bare UI labels require
+    // a complete, typed value so prose cannot become a fabricated parameter.
+    const numericKeys = 'v|version|niji|c|chaos|s|stylize|w|weird|q|quality|r|repeat|stop|seed|iw|cw|sw|sv|ow|exp|bs';
+    const bareNumeric = new RegExp(`^(${numericKeys})\\s+([0-9]+(?:\\.[0-9]+)?)$`, 'i');
+    const bareProfile = /^(profile|p|personalize)\s+([a-z0-9]+(?:\s+[a-z0-9]+)*)$/i;
+    const bareAspect = /^(ar|aspect)\s+(\d+:\d+)$/i;
+    const explicitPattern = /(?:^|\s)--([a-z][a-z0-9-]*)(?=\s|$)/gi;
+    const numericKey = new RegExp(`^(?:${numericKeys})$`, 'i');
+    const flags = new Set(['raw', 'tile', 'draft', 'hd', 'sd', 'fast', 'relax', 'turbo', 'stealth', 'public', 'loop', 'video']);
 
-    const paramPattern = new RegExp(
-        `(-{0,2})\\b(${validParams.join('|')})\\s+((?:https?:\\/\\/\\S+|[^\\n-]+))`,
-        'gi'
-    );
+    function extractParams(line) {
+        const matches = Array.from(line.matchAll(explicitPattern));
+        if (!matches.length) {
+            const bare = line.match(bareNumeric) || line.match(bareAspect) || line.match(bareProfile);
+            return bare ? [`--${bare[1].toLowerCase()} ${bare[2]}`] : [];
+        }
+        return matches.flatMap((match, index) => {
+            const key = match[1].toLowerCase();
+            let value = line.slice(match.index + match[0].length,
+                index + 1 < matches.length ? matches[index + 1].index : line.length).trim();
+            if (flags.has(key)) return [`--${key}`];
+            if (numericKey.test(key)) {
+                const number = value.match(/^\d+(?:\.\d+)?(?=\s|$)/);
+                return number ? [`--${key} ${number[0]}`] : [];
+            }
+            if (key === 'ar' || key === 'aspect') {
+                const ratio = value.match(/^\d+:\d+(?=\s|$)/);
+                return ratio ? [`--${key} ${ratio[0]}`] : [];
+            }
+            return value ? [`--${key} ${value}`] : [`--${key}`];
+        });
+    }
 
     lines.forEach(line => {
-        if (line.length > mainPrompt.length && line.length > 5) {
+        if (line.length > mainPrompt.length) {
             const isUI = [
                 "Midjourney", "Discord", "Job ID", "Upscale", "Remix", "Vary",
                 "Zoom", "Pan", "Web", "Creative", "Standard", "Short", "High",
                 "Low", "Medium", "Light", "Dark", "Subtle", "Strong", "Region",
-                "Favorite", "Image Weight", "Style Reference"
-            ].some(keyword => line.includes(keyword) && line.length < 40);
+                "Favorite", "Image Weight", "Style Reference", "Style Creator",
+                "Copy prompt", "Explore at draft quality and refine with variations."
+            ].some(keyword => (line === keyword || (line.includes(keyword) && line.length < 40)));
 
-            const isParamString = line.startsWith('--') || validParams.some(p => line.toLowerCase().startsWith(p + ' '));
+            const isParamString = line.startsWith('--') || bareNumeric.test(line) || bareAspect.test(line) || bareProfile.test(line);
 
             if (!isUI && !isParamString) {
                 mainPrompt = line;
             }
         }
 
-        let match;
-        paramPattern.lastIndex = 0;
-
-        while ((match = paramPattern.exec(line)) !== null) {
-            const key = match[2].toLowerCase();
-            let val = match[3].trim();
-
-            if (val.length > 0) {
-                const standardized = `--${key} ${val}`;
-                if (!capturedParams.includes(standardized)) {
-                    capturedParams.push(standardized);
-                }
-            }
+        for (const param of extractParams(line)) {
+            if (!capturedParams.includes(param)) capturedParams.push(param);
         }
     });
 
-    if (!mainPrompt) return null;
-
-    let finalStr = mainPrompt;
-
-    if (capturedParams.length > 0) {
-        const paramStr = capturedParams.join(' ');
-        if (!finalStr.toLowerCase().includes(paramStr.split(' ')[0])) {
-            finalStr += " " + paramStr;
+    // Parameter chips follow the actual prompt in image details. Prefer that
+    // adjacent text over unrelated longer text elsewhere in the page.
+    const firstChip = lines.findIndex(line => bareNumeric.test(line) || bareAspect.test(line) || bareProfile.test(line));
+    if (firstChip > 0) {
+        const preceding = lines[firstChip - 1];
+        if (!preceding.startsWith('--') && !/^(Copy prompt|Style Creator|Explore at draft quality and refine with variations\.)$/i.test(preceding)) {
+            mainPrompt = preceding;
         }
     }
+    if (!mainPrompt) return null;
 
-    return finalStr;
+    const promptOnly = mainPrompt.split(/\s--[a-z]/i)[0].trim();
+    return [promptOnly, ...capturedParams].join(' ');
 }
 
 function safeDecodeUrl(url) {
@@ -254,7 +274,7 @@ function handleSave() {
         rawPrompt = bestImg.alt || "";
     }
 
-    if (!rawPrompt || rawPrompt === 'Explore' || rawPrompt.length < 5) {
+    if (!rawPrompt || rawPrompt === 'Explore') {
         rawPrompt = document.title;
         if (rawPrompt === 'Explore') {
             rawPrompt = "Prompt not found... (Image saved)";

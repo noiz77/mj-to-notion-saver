@@ -2,7 +2,7 @@
 
 一键将 Midjourney / Nijijourney 的图片及其提示词（Prompt）保存到 Notion 数据库。
 
-当前版本：`v1.1.1`
+当前版本：`v1.1.4`
 
 ## ✨ 特点介绍
 
@@ -63,3 +63,11 @@
 ## 🔒 隐私声明
 
 本插件所有代码开源且透明。数据仅流向用户配置的 Notion 接口，不经过任何第三方服务器，且配置信息仅存储于本地浏览器。
+
+## 参数兼容说明
+
+已按 2026-11-09 的 Midjourney 官方参数说明核对 V8.2 / Niji 7。保留显式 `--参数`（包括未来新增参数）及历史图片参数，不自动为旧图片添加当前模型版本。无前缀页面文字仅识别完整的数值或宽高比参数行，避免把 Style Creator 等界面说明保存为参数。
+
+官方依据：[参数列表](https://docs.midjourney.com/hc/en-us/articles/32859204029709-Parameter-List)、[版本兼容表](https://docs.midjourney.com/hc/en-us/articles/32199405667853-Version)。网页布局仍可能变化，需在实际图片详情页验证抓取结果。
+
+运行参数回归检查：`node --test tests/parameters.test.cjs`。
